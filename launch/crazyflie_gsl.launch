@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- <arg name="uri" default="radio://0/60/2M/E7E7E7E7E7" /> -->
+    <arg name="uri" default="radio://0/100/2M/E7E7E7E7E7" />
+    <arg name="x" default="2" />
+    <arg name="y" default="2" />
+    <arg name="z" default="0" />
+
+    <rosparam command="load" file="$(find crazyflie_gsl)/scripts/anchor_pos.yaml" />
+    <param name="robot_description" command="$(find xacro)/xacro.py $(find crazyflie_description)/urdf/crazyflie2.urdf.xacro" />
+
+    <node name="rviz_CF" pkg="rviz" type="rviz" args="-d $(find crazyflie_gsl)/launch/crazyflie_viz.rviz"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster"
+        args="1 0 0 0 0 0 1 world lps 100" />
+    
+    <node name="lps_viz" pkg="crazyflie_gsl" type="lps_viz.py" />
+
+    <node pkg="crazyflie_gsl" name="crazyflie_server" type="crazyflie.py" output="screen">
+        <param name="uri" value="$(arg uri)" />
+        <param name="x" value="$(arg x)" />
+        <param name="y" value="$(arg y)" />
+        <param name="z" value="$(arg z)" />
+    </node>
+</launch>

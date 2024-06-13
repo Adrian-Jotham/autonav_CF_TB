@@ -1,0 +1,11 @@
+<launch>
+    <group>
+        <include file="$(find auto_nav)/launch/turtlebot3.launch"></include>
+        <node pkg="auto_nav" name="tb_server" type="Movement.py"/>
+        <node pkg="auto_nav" name="tb_marker" type="data_read.py"/>
+    </group>
+
+    <!-- <group>
+        <include file="$(find crazyflie_gsl)/launch/crazyflie_gsl.launch"></include>
+    </group> -->
+</launch>

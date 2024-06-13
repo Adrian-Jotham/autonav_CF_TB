@@ -1,0 +1,41 @@
+<launch>
+  <arg name="namespace" default="crazyflie" />
+  <arg name="tf_prefix" default="$(arg namespace)/" />
+  <arg name="uri" default="radio://0/100/2M/E7E7E7E7E7" />
+  <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>
+
+  <group ns="$(arg namespace)">
+    <!-- Load anchor positions -->
+    <rosparam command="load" file="$(find crazyflie_gsl)/scripts/anchor_pos.yaml" />
+
+    <!-- Set robot_description parameter using the xacro command -->
+    <param name="robot_description" command="$(find xacro)/xacro.py $(find crazyflie_description)/urdf/crazyflie2.urdf.xacro" />
+
+    <!-- Crazyflie node -->
+    <node name="crazyflie_node" pkg="auto_nav" type="crazyflie.py" output="screen">
+        <param name="uri" value="$(arg uri)" />
+    </node>
+
+    <!-- Robot state publisher node -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
+      <param name="robot_description" value="crazyflie"  />
+      <param name="tf_prefix" value="$(arg tf_prefix)" />
+    </node>
+    <!-- <node name="rviz_CF" pkg="rviz" type="rviz" args="-d $(find crazyflie_gsl)/launch/crazyflie_namespace.rviz"/> -->
+    <!-- Additional node -->
+    <!-- <node name="lps_viz" pkg="auto_nav" type="lps_viz.py" /> -->
+  </group>
+
+  <!-- RViz node (outside of the group for global remapping) -->
+  <!-- <node name="rviz_CF" pkg="rviz" type="rviz" args="-d $(find crazyflie_gsl)/launch/crazyflie_namespace.rviz">
+    <remap from="/tf" to="/$(arg namespace)/tf" />
+  </node> -->
+
+  
+  <!-- <group ns="tb3">
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)">
+    <param name="frame_id" value="tb3/map"/>
+  </node>
+  </group> -->
+
+</launch>
