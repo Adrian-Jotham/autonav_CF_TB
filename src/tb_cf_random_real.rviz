@@ -5,17 +5,14 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Status1
-        - /Grid1
         - /Global Map1/Costmap1
         - /Global Map1/Planner1
         - /Local Map1/Polygon1
         - /Local Map1/Costmap1
         - /Local Map1/Planner1
+        - /TF1/Frames1
         - /Marker1
         - /MarkerArray1
-        - /MarkerArray2
-        - /MarkerArray3
       Splitter Ratio: 0.5
     Tree Height: 728
   - Class: rviz/Selection
@@ -35,7 +32,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -122,7 +119,7 @@ Visualization Manager:
       Color: 204; 0; 0
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -137,7 +134,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Class: rviz/Image
       Enabled: false
       Image Topic: /raspicam_node/image
@@ -297,54 +294,56 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/TF
-      Enabled: false
+      Enabled: true
       Filter (blacklist): ""
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        tb3/base_footprint:
+          Value: true
+        tb3/base_link:
+          Value: true
+        tb3/base_scan:
+          Value: true
+        tb3/caster_back_link:
+          Value: true
+        tb3/imu_link:
+          Value: true
+        tb3/map:
+          Value: true
+        tb3/odom:
+          Value: true
+        tb3/wheel_left_link:
+          Value: true
+        tb3/wheel_right_link:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
-      Update Interval: 0
-      Value: false
-    - Alpha: 1
-      Class: rviz/RobotModel
-      Collision Enabled: false
-      Enabled: true
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        Link Tree Style: Links in Alphabetic Order
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-      Name: RobotModel
-      Robot Description: crazyflie/robot_description
-      TF Prefix: crazyflie
+        tb3/map:
+          tb3/odom:
+            tb3/base_footprint:
+              tb3/base_link:
+                tb3/base_scan:
+                  {}
+                tb3/caster_back_link:
+                  {}
+                tb3/imu_link:
+                  {}
+                tb3/wheel_left_link:
+                  {}
+                tb3/wheel_right_link:
+                  {}
       Update Interval: 0
       Value: true
-      Visual Enabled: true
     - Class: rviz/Marker
-      Enabled: false
-      Marker Topic: /crazyflie/marker
-      Name: Marker
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /crazyflie/anchors_markers
-      Name: MarkerArray
+      Marker Topic: visualization_marker
+      Name: Marker
       Namespaces:
         {}
       Queue Size: 100
@@ -354,15 +353,8 @@ Visualization Manager:
       Marker Topic: /tb3/gas_marker_tb
       Name: MarkerArray
       Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /crazyflie/gas_concentration_markers
-      Name: MarkerArray
-      Namespaces:
-        {}
+        tb3/gas_concentration_tb: true
+        tb3/gas_concentration_text: true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -389,26 +381,21 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz/Orbit
-      Distance: 7.979617118835449
+      Angle: -3.1557962894439697
+      Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: 2.7677431106567383
-        Y: -2.321098804473877
-        Z: 0.0008273124694824219
-      Focal Shape Fixed Size: true
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3465526103973389
+      Scale: 102.6827392578125
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz)
-      Yaw: 1.5574660301208496
+      Value: TopDownOrtho (rviz)
+      X: 2.328984498977661
+      Y: -1.8845398426055908
     Saved: ~
 Window Geometry:
   Displays:

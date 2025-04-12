@@ -8,7 +8,7 @@ from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import Point
 
 def loggingcsv(data):
-    with open("/home/dryan/Desktop/SimulasiKamis/CF.csv", "w") as file:
+    with open("/home/dryan/Desktop/TigaRobot/CF_1.csv", "w") as file:
         # Write headers
         file.write("x, y, intensity, id\n")
         # Iterate over the list and write each item to the file
@@ -175,17 +175,17 @@ if __name__ == '__main__':
         time.sleep(3)
 
         # WP Single Crazyflie + semua waypoint
-        create_moving_marker(0, 0, 5.5, -0.5)
-        create_moving_marker(last_x, last_y, 5.0, -1.5)
+        # create_moving_marker(0, 0, 5.5, -0.5)
+        # create_moving_marker(last_x, last_y, 5.0, -1.5)
 
-        create_moving_marker(last_x, last_y, 0.5, -1.5)
-        create_moving_marker(last_x, last_y, 0.5, -2.5)
+        # create_moving_marker(last_x, last_y, 0.5, -1.5)
+        # create_moving_marker(last_x, last_y, 0.5, -2.5)
 
-        create_moving_marker(last_x, last_y, 5.0, -2.5)
-        create_moving_marker(last_x, last_y, 4.5, -3.5)
+        # create_moving_marker(last_x, last_y, 5.0, -2.5)
+        # create_moving_marker(last_x, last_y, 4.5, -3.5)
 
-        create_moving_marker(last_x, last_y, 0.8, -3.3)
-        create_moving_marker(last_x, last_y, 4.0, -5.0)
+        # create_moving_marker(last_x, last_y, 0.8, -3.3)
+        # create_moving_marker(last_x, last_y, 4.0, -5.0)
 
         # WP Crazyflie dalem
         # create_moving_marker(1.0, -3.0, 1.0, -1.0)
@@ -207,6 +207,17 @@ if __name__ == '__main__':
         # create_moving_marker(last_x, last_y, 0.8, -3.3)
         # create_moving_marker(last_x, last_y, 4.0, -5.0)
 
+        #WP BAGI TIGA
+        create_moving_marker(0.1, -2.0, 2.8, -2.0)
+        create_moving_marker(last_x, last_y, 2.8, -3.0)
+        
+        create_moving_marker(last_x, last_y, 0.2, -3.0)
+        create_moving_marker(last_x, last_y, 2.8, -3.5)
+
+        create_moving_marker(last_x, last_y, 0.2, -3.3)
+        create_moving_marker(last_x, last_y, 2.5, -4.3)
+
         loggingcsv(datalog)
     except rospy.ROSInterruptException:
+        loggingcsv(datalog)
         pass

@@ -40,9 +40,20 @@ def calculate_intensity(x, y, sources):
         intensities.append(intensity)
     return max(intensities)
 
+def loggingcsv(data):
+    with open("/home/dryan/Desktop/SimulasiKamis/simulatedgrid.csv", "w") as file:
+        # Write headers only if the file is empty
+        if file.tell() == 0:
+            file.write("x, y, intensity, id\n")
+        # Iterate over the list and write each item to the file
+        for idx, item in enumerate(data):
+            x, y, intensity = item
+            file.write(f"{x}, {y}, {intensity:.2f}, {idx}\n")
+    rospy.loginfo("Print grid csv success")
+
 def main():
     rospy.init_node('gas_source_marker_array')
-    # datalog = []
+    datalog = []
     marker_pub = rospy.Publisher('visualization_marker_array', MarkerArray, queue_size=10)
 
     rate = rospy.Rate(1)  # 1 Hz
@@ -60,23 +71,12 @@ def main():
             marker = create_marker(real_x, real_y, intensity, marker_id)
             markers.markers.append(marker)
             marker_id += 1
-            # datalog.append(real_x, real_y, intensity)
+            datalog.append((real_x, real_y, intensity))
 
     while not rospy.is_shutdown():
         marker_pub.publish(markers)
         rate.sleep()
-    # loggingcsv(datalog)
-
-def loggingcsv(data):
-    with open("/home/dryan/Desktop/SimulasiKamis/simulatedgrid.csv", "w") as file:
-        # Write headers only if the file is empty
-        if file.tell() == 0:
-            file.write("x, y, intensity, id\n")
-        # Iterate over the list and write each item to the file
-        for item in data:
-            x, y, intensity = item
-            file.write(f"{x}, {y}, {intensity:.2f}, {id}\n")
-    rospy.loginfo("Print grid csv success")
+    loggingcsv(datalog)
 
 if __name__ == '__main__':
     try:

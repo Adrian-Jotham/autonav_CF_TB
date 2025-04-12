@@ -6,7 +6,7 @@ from cflib.crazyflie.log import LogConfig
 from cflib.positioning.position_hl_commander import PositionHlCommander
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 
-import rospy
+import rospy, random
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Point
 import geometry_msgs.msg
@@ -29,22 +29,19 @@ def loggingcsv(data):
              'kalman.q0', 'kalman.q1', 'kalman.q2', 'kalman.q3', 
              'TGS8100.intensity']
     
-    # datalist = [data.get(key, '') for key in kolom]
-
     nama_file = 'data.csv'
-    with open("/home/dryan/Desktop/Rabu5Juni/normalisasibarengCF5.csv", "w") as file:
-    # Iterate over the list and write each item to the file
+    with open("/home/dryan/Desktop/TBCFRANDOM/CF3.csv", "w") as file:
         for item in data:
             for baris in item:
                 awal = list(baris.values())
                 konversi_list = [str(item) for item in awal]
                 konversi = ', '.join(konversi_list)
-                file.write(konversi+ "\n")
+                file.write(konversi + "\n")
 
 def get_color_for_concentration(concentration):
-    if concentration >= 2.5:
+    if (concentration >= 2.5):
         return ColorRGBA(1.0, 0.0, 0.0, 1.0)  # Red for high concentration
-    elif concentration >= 1.4:
+    elif (concentration >= 1.4):
         return ColorRGBA(1.0, 1.0, 0.0, 1.0)  # Yellow for medium concentration
     else:
         return ColorRGBA(0.0, 1.0, 0.0, 1.0)  # Green for low concentration
@@ -85,12 +82,11 @@ def publish_gas(data, id):
     marker_text.type = Marker.TEXT_VIEW_FACING
     marker_text.action = Marker.ADD
     marker_text.pose.position = point
-    marker_text.pose.position.z += 0  # Offset the text above the marker
+    marker_text.pose.position.z += 0.1  # Offset the text above the marker
     marker_text.pose.orientation.w = 1
     marker_text.scale.z = 0.1  # Font size
     marker_text.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)  # White color
-    # marker_text.text = f"Concentration: {concentration:.2f}"  # Format concentration value
-    marker_text.text = f"      {concentration:.2f}"  # Format concentration value
+    marker_text.text = f"{concentration:.2f}"  # Format concentration value
 
     marker_array.markers.append(marker)
     marker_array.markers.append(marker_text)
@@ -107,7 +103,7 @@ def publish_tf(data):
     transform.header.frame_id = "tb3/map"  # Change this to your desired parent frame
     transform.child_frame_id = "crazyflie/base_link"  # Change this to your desired child frame
 
-    transform.transform.translation.x = data['stateEstimate.x']  
+    transform.transform.translation.x = data['stateEstimate.x']
     transform.transform.translation.y = data['stateEstimate.y']
     transform.transform.translation.z = data['stateEstimate.z']
 
@@ -117,42 +113,26 @@ def publish_tf(data):
     transform.transform.rotation.w = data['kalman.q0']
 
     tf_msg = TFMessage([transform])
-    # print(data)
-    # print(tf_msg) #debugging option
     pub_tf.publish(tf_msg)
 
 # Callback function to handle received log data
 def log_data_callback(timestamp, data, logconf):
-    # print('[{}] {}'.format(timestamp, data))
-    data['seconds']=rospy.get_rostime().secs
-    data['nseconds']=rospy.get_rostime().nsecs
-    #nanti ubah di loginfo untuk log 
-    # rospy.loginfo('[{}] {}'.format(timestamp, data))
-    # rospy.loginfo(data)
-
-    # global datalog
-    # datalog.append([data])
-
+    data['seconds'] = rospy.get_rostime().secs
+    data['nseconds'] = rospy.get_rostime().nsecs
     publish_tf(data)
     publish_gas(data, timestamp)
     
-
 if __name__ == "__main__":
     # Initialize the Crazyflie API
     cflib.crtp.init_drivers()
 
-    # logging.basicConfig(level=logging.ERROR)
     rospy.init_node('crazyflie', anonymous=True)
     namespace = rospy.get_namespace()
-    # pub_tf = rospy.Publisher(f'{namespace}tf', TFMessage, queue_size=100)
     pub_gas = rospy.Publisher(f'{namespace}gas_concentration_markers', MarkerArray, queue_size=100)
     pub_tf = rospy.Publisher('/tf', TFMessage, queue_size=100)
-    # pub_gas = rospy.Publisher('/gas_concentration_markers', MarkerArray, queue_size=100)
-
 
     # URI to connect to the Crazyflie (change this to match your Crazyflie's URI)
     uri = 'radio://0/80/2M/E7E7E7E7E7'
-    # uri = rospy.get_param('uri','radio://0/100/2M/E7E7E7E7E7')
 
     # Define the log configuration
     log_conf = LogConfig(name='MyLog', period_in_ms=10)
@@ -165,8 +145,15 @@ if __name__ == "__main__":
     log_conf.add_variable('kalman.q3', 'FP16')
     log_conf.add_variable('TGS8100.intensity', 'FP16')
 
-    then =rospy.get_time()
+    then = rospy.get_time()
     datalog = []
+    coordinates = [
+        (0.5, -0.8), (0.5, -1.0), (0.5, -2.0), (0.5, -3.0), 
+        (1.0, -0.5), (1.0, -1.0), (1.0, -2.0), (1.0, -3.0), (1.0, -3.5), 
+        (2.0, -0.5), (2.0, -1.0), (2.0, -2.0), (2.0, -3.0), (2.0, -3.5),  
+        (3.0, -0.5), (3.0, -1.0), (3.0, -3.4),  (3.0, -4.5), 
+    ]
+
     # Connect to the Crazyflie
     with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
         cf = scf.cf
@@ -175,67 +162,30 @@ if __name__ == "__main__":
         log_conf.start()
         rospy.loginfo("start logging")
 
-        time.sleep(10.0)
-        r = rospy.Rate(10) # 10hz, for publishing or just waiting
-        while not rospy.is_shutdown():
-            #might publish something
-            r.sleep()
+        # time.sleep(3.0)
+        # r = rospy.Rate(10) # 10hz, for publishing or just waiting
+        # while not rospy.is_shutdown():
+        #     #might publish something
+        #     r.sleep()
 
-        # Create a PositionCommander object for flying, skenario dalam
-        # with PositionHlCommander(
-        #                 cf,
-        #                 x=1.0, y=-3.0, z=0.0,
-        #                 default_velocity=0.35,
-        #                 default_height=0.8,
-        #                 controller=PositionHlCommander.CONTROLLER_PID) as pc:
+        with PositionHlCommander(
+            cf,
+            x=0.5, y=-0.8, z=0.0,
+            default_velocity=0.35,
+            default_height=0.8,
+            controller=PositionHlCommander.CONTROLLER_PID) as pc:
             
-            
-        #     pc.go_to(1.0, -1.0, velocity=None)
-        #     pc.go_to(2.0, -1.0, velocity=None)
-        #     # # pc.go_to(2,0, -2,0)
-        #     # # pc.go_to(2,0, -3,0)
-        #     pc.go_to(2.0, -4.0, velocity=None)
+            # pc.go_to()
 
-        #     pc.go_to(3.0, -4.0, velocity=None)
-        #     # # pc.go_to(3,0, -3,0)
-        #     # # pc.go_to(3,0, -2,0)
-        #     pc.go_to(3.0, -1.0, velocity=None)
+            while not rospy.is_shutdown() and coordinates:
+                next_coord = random.choice(coordinates)
+                pc.go_to(next_coord[0], next_coord[1])
+                coordinates.remove(next_coord)
+                rospy.loginfo(f"Going to coordinates: {next_coord}")
 
-        #     pc.go_to(4.0, -1.0, velocity=None)
-        #     # # pc.go_to(4,0, -2,0)
-        #     # # pc.go_to(4,0, -3,0)
-        #     # # pc.go_to(4,0, -4,0)
-        #     pc.go_to(4.0, -5.0, velocity=None)
+            # Land the Crazyflie
+            pc.land()
 
-        #     # Land the Crazyflie
-        #     pc.land()
-
-        # Create a PositionCommander object for flying, skenario 50 50
-        # with PositionHlCommander(
-        #                 cf,
-        #                 x=2.0, y=-3.0, z=0.0,
-        #                 default_velocity=0.35,
-        #                 default_height=0.8,
-        #                 controller=PositionHlCommander.CONTROLLER_PID) as pc:
-            
-            
-        #     # pc.go_to(5.0, -3.0, velocity=None)
-        #     # pc.go_to(4.5, -4.0, velocity=None)
-            
-        #     time.sleep(1)
-        #     pc.go_to(2.0, -3.0)
-        #     time.sleep(5)
-        #     pc.go_to(3.0, -3.0)
-        #     time.sleep(5)
-        #     pc.go_to(2.0, -3.0)
-        #     time.sleep(1)
-        #     # pc.go_to(1.0, -4.0, velocity=None)
-        #     # pc.go_to(4.0, -5.0, velocity=None)
-
-        #     # Land the Crazyflie
-        #     pc.land()
-
-        # rospy.loginfo("The end of logging")
         # Stop logging
         log_conf.stop()
         loggingcsv(datalog)

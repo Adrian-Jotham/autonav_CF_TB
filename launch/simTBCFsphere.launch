@@ -52,9 +52,9 @@
   <node pkg="auto_nav" name="grid_marker" type="simulatedgrid.py" />
   
   <!-- Skrip Crazyflie -->
-  <node pkg="auto_nav" name="crazyflie_1" type="crazysim.py" />
+  <node pkg="auto_nav" name="crazyflie_1" type="crazysimsphere.py" />
 
-  <node pkg="auto_nav" name="crazyflie_2" type="crazysim2.py" />
+  <node pkg="auto_nav" name="crazyflie_2" type="crazysimsphere2.py" />
 
   <node pkg="auto_nav" name="tb1" type="movementsimulation.py" />
   <node pkg="auto_nav" name="fake_sensor" type="tb3fakesensor.py" />

@@ -5,11 +5,10 @@ from visualization_msgs.msg import Marker, MarkerArray
 import numpy as np
 import time, math
 from std_msgs.msg import ColorRGBA
-from geometry_msgs.msg import Point
 from geometry_msgs.msg import Point, PoseWithCovarianceStamped
 
 def loggingcsv(data):
-    with open("/home/dryan/Desktop/TigaRobot/Tb3.csv", "w") as file:
+    with open("/home/dryan/Desktop/SimulasiKamis/Tb3anjay2.csv", "a") as file:
         # Write headers only if the file is empty
         if file.tell() == 0:
             file.write("x, y, intensity, id\n")
@@ -91,19 +90,20 @@ def fakesensor(x, y, id):
         then = now
     rospy.loginfo(f"Appended data: {data}")
 
-def current_pose_callback(msg):
+def current_pose_callback(msg, robot_id):
     global current_pose
-    current_pose = msg
-    rospy.loginfo(f"Received pose: {current_pose.pose.pose.position.x}, {current_pose.pose.pose.position.y}")
+    current_pose[robot_id] = msg
+    rospy.loginfo(f"Received pose for {robot_id}: {current_pose[robot_id].pose.pose.position.x}, {current_pose[robot_id].pose.pose.position.y}")
 
 if __name__ == '__main__':
     try:
         global datalog, marker_id, then
         datalog = []
-        current_pose = None
+        current_pose = {'tb3_0': None, 'tb3_1': None}
 
         rospy.init_node('moving_marker_node', anonymous=True)
-        rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped, current_pose_callback)
+        # rospy.Subscriber('/tb3_0/amcl_pose', PoseWithCovarianceStamped, current_pose_callback, 'tb3_0')
+        rospy.Subscriber('/tb3_1/amcl_pose', PoseWithCovarianceStamped, current_pose_callback, 'tb3_1')
         
         marker_id = 0
         offset = 0.5  # Adjust map offset
@@ -112,12 +112,13 @@ if __name__ == '__main__':
         time.sleep(3)
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
-            if current_pose is not None:
-                x = current_pose.pose.pose.position.x
-                y = current_pose.pose.pose.position.y
-                calculate_intensity(x, y, sources)
-                fakesensor(x, y, marker_id)
-                marker_id += 1
+            for robot_id in current_pose:
+                if current_pose[robot_id] is not None:
+                    x = current_pose[robot_id].pose.pose.position.x
+                    y = current_pose[robot_id].pose.pose.position.y
+                    calculate_intensity(x, y, sources)
+                    fakesensor(x, y, marker_id)
+                    marker_id += 1
             rate.sleep()
     except rospy.ROSInterruptException:
         pass

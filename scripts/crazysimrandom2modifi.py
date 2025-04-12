@@ -5,10 +5,14 @@ from visualization_msgs.msg import Marker, MarkerArray
 import numpy as np
 import time, math
 from std_msgs.msg import ColorRGBA
-from geometry_msgs.msg import Point
+import random
+import threading
+
+mutex = threading.Lock()
+occupied_waypoints = []
 
 def loggingcsv(data):
-    with open("/home/dryan/Desktop/SimulasiKamis/CF.csv", "w") as file:
+    with open("/home/dryan/Desktop/SimulasiKamis/CF2.csv", "w") as file:
         # Write headers
         file.write("x, y, intensity, id\n")
         # Iterate over the list and write each item to the file
@@ -26,7 +30,7 @@ def calculate_intensity(x, y, sources):
     return max(intensities)
 
 def fakesensor(x, y, id):
-    marker_array_pub = rospy.Publisher('gas_sensor_array_cf', MarkerArray, queue_size=10)
+    marker_array_pub = rospy.Publisher('gas_sensor_array_cf_2', MarkerArray, queue_size=10)
     
     global sources, datalog, then
     intensity = calculate_intensity(x, y, sources)
@@ -88,7 +92,7 @@ def fakesensor(x, y, id):
         datalog.append(data)
         then = now
 
-def create_moving_marker(x_start, y_start, x_end , y_end, velocity=0.35):
+def create_moving_marker(x_start, y_start, x_end, y_end, velocity=0.35):
     """
     Create a moving marker that navigates from start to end coordinates.
 
@@ -102,7 +106,7 @@ def create_moving_marker(x_start, y_start, x_end , y_end, velocity=0.35):
     offset = 0.5
     x_end -= offset
     y_end += offset
-    marker_pub = rospy.Publisher('Crazyflie', Marker, queue_size=10)
+    marker_pub = rospy.Publisher('Crazyflie_2', Marker, queue_size=10)
     
     rate = rospy.Rate(10)  # 10 Hz update rate
 
@@ -167,45 +171,33 @@ if __name__ == '__main__':
         marker_id = 0
         offset = 0.5  # Adjust map offset
 
-        #alasan offset : karena sumber gasnya di offset (supaya pas di rviz), artinya CF juga harus kena offset supaya nilainya pas
-        #karena aktual dan simulasi beda, waktu akual bisasaja treknya berbeda sama di rviz
-
         sources = [(3.13 - offset, -3.18 + offset), (0.1 - offset, -3.4 + offset)]
         then = rospy.get_time()
         time.sleep(3)
 
-        # WP Single Crazyflie + semua waypoint
-        create_moving_marker(0, 0, 5.5, -0.5)
-        create_moving_marker(last_x, last_y, 5.0, -1.5)
+        coordinates = [
+            (0, 0), (0, -1), (0, -2), (0, -3), 
+            (1, 0), (1, -1), (1, -2), (1, -3), (1, -3.5), 
+            (2, 0), (2, -1), (2, -2), (2, -3), (2, -4),  
+            (3, 0), (3, -1), (3, -3.4), (3, -4), (3, -5), 
+            (4, 0), (4, -1), (4, -2), (4, -3), (4, -4),
+            (5,0), (5,-1),
+        ]
 
-        create_moving_marker(last_x, last_y, 0.5, -1.5)
-        create_moving_marker(last_x, last_y, 0.5, -2.5)
+        last_x, last_y = coordinates[0]
 
-        create_moving_marker(last_x, last_y, 5.0, -2.5)
-        create_moving_marker(last_x, last_y, 4.5, -3.5)
+        while not rospy.is_shutdown():
+            # Choose a new waypoint that is not occupied
+            with mutex:
+                next_coords = [coord for coord in coordinates if coord not in occupied_waypoints]
+                next_coord = random.choice(next_coords)
+                occupied_waypoints.append(next_coord)
 
-        create_moving_marker(last_x, last_y, 0.8, -3.3)
-        create_moving_marker(last_x, last_y, 4.0, -5.0)
+            create_moving_marker(last_x, last_y, next_coord[0], next_coord[1])
 
-        # WP Crazyflie dalem
-        # create_moving_marker(1.0, -3.0, 1.0, -1.0)
-        # create_moving_marker(last_x, last_y, 2.0, -1.0)
-
-        # create_moving_marker(last_x, last_y, 2.0, -4.0)
-        # create_moving_marker(last_x, last_y, 3.0, -4.0)
-
-        # create_moving_marker(last_x, last_y, 3.0, -4.0)
-        # create_moving_marker(last_x, last_y, 3.0, -1.0)
-
-        # create_moving_marker(last_x, last_y, 4.0, -1.0)
-        # create_moving_marker(last_x, last_y, 4.0, -5.0)
-
-        # WP Crazyflie kiri
-        # create_moving_marker(0.25, -2.5, 5.0, -2.5)
-        # create_moving_marker(last_x, last_y, 4.5, -3.5)
-
-        # create_moving_marker(last_x, last_y, 0.8, -3.3)
-        # create_moving_marker(last_x, last_y, 4.0, -5.0)
+            with mutex:
+                occupied_waypoints.remove((last_x, last_y))
+                last_x, last_y = next_coord
 
         loggingcsv(datalog)
     except rospy.ROSInterruptException:

@@ -5,13 +5,12 @@
   <arg name="open_rviz" default="true"/>
   <arg name="move_forward_only" default="false"/>
   <arg name="initial_pose_x" default="0.0"/>
-  <arg name="initial_pose_y" default="0.2"/>
+  <arg name="initial_pose_y" default="-3.0"/>
   <arg name="initial_pose_a" default="0.0"/>
   <!-- Turtlebot3 -->
   <!-- <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
     <arg name="model" value="$(arg model)" />
   </include> -->
-
 
   <!-- Map server -->
   <group ns="tb3">
@@ -44,7 +43,7 @@
     <arg name="move_forward_only" value="$(arg move_forward_only)"/>
   </include>
   
-  <node pkg="auto_nav" name="tb_server" type="Movement.py"/>
+  <node pkg="auto_nav" name="tb" type="movementrandom.py" />
   </group>
   <node pkg="auto_nav" name="tb_marker" type="data_read.py"/>
   <!-- rviz -->

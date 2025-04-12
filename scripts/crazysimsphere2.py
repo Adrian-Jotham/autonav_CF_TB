@@ -8,28 +8,28 @@ from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import Point
 
 def loggingcsv(data):
-    with open("/home/dryan/Desktop/SimulasiKamis/CF.csv", "w") as file:
+    with open("/home/dryan/Desktop/SimulasiKamis/CF2.csv", "w") as file:
         # Write headers
-        file.write("x, y, intensity, id\n")
+        file.write("x, y, z, intensity, id\n")
         # Iterate over the list and write each item to the file
         for item in data:
-            x, y, intensity, id = item
-            file.write(f"{x}, {y}, {intensity:.2f}, {id}\n")
+            x, y, z, intensity, id = item
+            file.write(f"{x}, {y}, {z}, {intensity:.2f}, {id}\n")
     rospy.loginfo("Print CF csv success")
-    
-def calculate_intensity(x, y, sources):
+
+def calculate_intensity(x, y, z, sources):
     intensities = []
-    for (source_x, source_y) in sources:
-        distance = math.sqrt((x - source_x) ** 2 + (y - source_y) ** 2)
-        intensity = max(0.1, 10 - distance * 5)  # 2 meter means no intensity, r=2
+    for (source_x, source_y, source_z) in sources:
+        distance = math.sqrt((x - source_x) ** 2 + (y - source_y) ** 2 + (z - source_z) ** 2)
+        intensity = max(0, 10 - distance * 5)  # 2 meter means no intensity, r=2
         intensities.append(intensity)
     return max(intensities)
 
-def fakesensor(x, y, id):
-    marker_array_pub = rospy.Publisher('gas_sensor_array_cf', MarkerArray, queue_size=10)
+def fakesensor(x, y, z, id):
+    marker_array_pub = rospy.Publisher('gas_sensor_array_cf_2', MarkerArray, queue_size=10)
     
     global sources, datalog, then
-    intensity = calculate_intensity(x, y, sources)
+    intensity = calculate_intensity(x, y, z, sources)
     
     marker_array = MarkerArray()
     
@@ -59,7 +59,7 @@ def fakesensor(x, y, id):
 
     marker.pose.position.x = x
     marker.pose.position.y = y
-    marker.pose.position.z = 0.8
+    marker.pose.position.z = z
 
     # Create text marker
     marker_text = Marker()
@@ -70,7 +70,7 @@ def fakesensor(x, y, id):
     marker_text.action = Marker.ADD
     marker_text.pose.position.x = x
     marker_text.pose.position.y = y
-    marker_text.pose.position.z = 1.0  # Offset the text above the marker
+    marker_text.pose.position.z = z + 0.2  # Offset the text above the marker
     marker_text.pose.orientation.w = 1
     marker_text.scale.z = 0.1  # Font size
     marker_text.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)  # White color
@@ -79,7 +79,7 @@ def fakesensor(x, y, id):
     marker_array.markers.append(marker)
     marker_array.markers.append(marker_text)
 
-    data = [x, y, intensity, id]
+    data = [x, y, z, intensity, id]
     now = rospy.get_time()
     
     # Publish marker array
@@ -88,21 +88,23 @@ def fakesensor(x, y, id):
         datalog.append(data)
         then = now
 
-def create_moving_marker(x_start, y_start, x_end , y_end, velocity=0.35):
+def create_moving_marker(x_start, y_start, z_start, x_end, y_end, z_end, velocity=0.35):
     """
     Create a moving marker that navigates from start to end coordinates.
 
     :param x_start: Starting x coordinate
     :param y_start: Starting y coordinate
+    :param z_start: Starting z coordinate
     :param x_end: Ending x coordinate
     :param y_end: Ending y coordinate
+    :param z_end: Ending z coordinate
     :param velocity: Velocity of the marker
     """
-    global last_x, last_y, marker_id
+    global last_x, last_y, last_z, marker_id
     offset = 0.5
     x_end -= offset
     y_end += offset
-    marker_pub = rospy.Publisher('Crazyflie', Marker, queue_size=10)
+    marker_pub = rospy.Publisher('Crazyflie_2', Marker, queue_size=10)
     
     rate = rospy.Rate(10)  # 10 Hz update rate
 
@@ -126,20 +128,20 @@ def create_moving_marker(x_start, y_start, x_end , y_end, velocity=0.35):
     marker.color.a = 1.0
 
     # Calculate direction vector and normalize it
-    direction = np.array([x_end - x_start, y_end - y_start], dtype=float)
+    direction = np.array([x_end - x_start, y_end - y_start, z_end - z_start], dtype=float)
     distance = np.linalg.norm(direction)
     
     if distance != 0:  # Avoid division by zero
         direction = direction / distance
 
-    current_position = np.array([x_start, y_start], dtype=float)
-    target_position = np.array([x_end, y_end], dtype=float)
+    current_position = np.array([x_start, y_start, z_start], dtype=float)
+    target_position = np.array([x_end, y_end, z_end], dtype=float)
 
     while not rospy.is_shutdown():
         # Update marker position
         marker.pose.position.x = current_position[0]
         marker.pose.position.y = current_position[1]
-        marker.pose.position.z = 0.8
+        marker.pose.position.z = current_position[2]
 
         # Publish marker
         marker_pub.publish(marker)
@@ -147,13 +149,12 @@ def create_moving_marker(x_start, y_start, x_end , y_end, velocity=0.35):
         # Move the marker towards the target position
         current_position += direction * velocity / 10.0
 
-        fakesensor(current_position[0], current_position[1], marker_id)
+        fakesensor(current_position[0], current_position[1], current_position[2], marker_id)
         marker_id += 1
 
         # Stop if the marker has reached or passed the target position
         if np.linalg.norm(current_position - target_position) <= velocity / 10.0:
-            last_x = x_end
-            last_y = y_end
+            last_x, last_y, last_z = x_end, y_end, z_end
             break
 
         rate.sleep()
@@ -162,50 +163,27 @@ if __name__ == '__main__':
     try:
         rospy.init_node('moving_marker_node', anonymous=True)
 
-        global last_x, last_y, datalog, marker_id, then
+        global last_x, last_y, last_z, datalog, marker_id, then
         datalog = []
         marker_id = 0
         offset = 0.5  # Adjust map offset
 
-        #alasan offset : karena sumber gasnya di offset (supaya pas di rviz), artinya CF juga harus kena offset supaya nilainya pas
-        #karena aktual dan simulasi beda, waktu akual bisasaja treknya berbeda sama di rviz
-
-        sources = [(3.13 - offset, -3.18 + offset), (0.1 - offset, -3.4 + offset)]
+        sources = [(3.13 - offset, -3.18 + offset, 0.0), (0.1 - offset, -3.4 + offset, 0.0)]
         then = rospy.get_time()
         time.sleep(3)
 
-        # WP Single Crazyflie + semua waypoint
-        create_moving_marker(0, 0, 5.5, -0.5)
-        create_moving_marker(last_x, last_y, 5.0, -1.5)
+        # WP Single Crazyflie + all waypoints with z=0.8
+        create_moving_marker(0, 0, 1.5, 5.5, -0.5, 1.5)
+        create_moving_marker(last_x, last_y, last_z, 5.0, -1.5, 1.5)
 
-        create_moving_marker(last_x, last_y, 0.5, -1.5)
-        create_moving_marker(last_x, last_y, 0.5, -2.5)
+        create_moving_marker(last_x, last_y, last_z, 0.5, -1.5, 1.5)
+        create_moving_marker(last_x, last_y, last_z, 0.5, -2.5, 1.5)
 
-        create_moving_marker(last_x, last_y, 5.0, -2.5)
-        create_moving_marker(last_x, last_y, 4.5, -3.5)
+        create_moving_marker(last_x, last_y, last_z, 5.0, -2.5, 1.5)
+        create_moving_marker(last_x, last_y, last_z, 4.5, -3.5, 1.5)
 
-        create_moving_marker(last_x, last_y, 0.8, -3.3)
-        create_moving_marker(last_x, last_y, 4.0, -5.0)
-
-        # WP Crazyflie dalem
-        # create_moving_marker(1.0, -3.0, 1.0, -1.0)
-        # create_moving_marker(last_x, last_y, 2.0, -1.0)
-
-        # create_moving_marker(last_x, last_y, 2.0, -4.0)
-        # create_moving_marker(last_x, last_y, 3.0, -4.0)
-
-        # create_moving_marker(last_x, last_y, 3.0, -4.0)
-        # create_moving_marker(last_x, last_y, 3.0, -1.0)
-
-        # create_moving_marker(last_x, last_y, 4.0, -1.0)
-        # create_moving_marker(last_x, last_y, 4.0, -5.0)
-
-        # WP Crazyflie kiri
-        # create_moving_marker(0.25, -2.5, 5.0, -2.5)
-        # create_moving_marker(last_x, last_y, 4.5, -3.5)
-
-        # create_moving_marker(last_x, last_y, 0.8, -3.3)
-        # create_moving_marker(last_x, last_y, 4.0, -5.0)
+        create_moving_marker(last_x, last_y, last_z, 0.8, -3.3, 1.5)
+        create_moving_marker(last_x, last_y, last_z, 4.0, -5.0, 1.5)
 
         loggingcsv(datalog)
     except rospy.ROSInterruptException:

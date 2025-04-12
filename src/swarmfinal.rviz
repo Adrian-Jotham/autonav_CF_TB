@@ -12,6 +12,7 @@ Panels:
         - /Local Map1/Polygon1
         - /Local Map1/Costmap1
         - /Local Map1/Planner1
+        - /RobotModel2
         - /Marker1
         - /MarkerArray1
         - /MarkerArray2
@@ -354,7 +355,8 @@ Visualization Manager:
       Marker Topic: /tb3/gas_marker_tb
       Name: MarkerArray
       Namespaces:
-        {}
+        tb3/gas_concentration_tb: true
+        tb3/gas_concentration_text: true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -362,7 +364,8 @@ Visualization Manager:
       Marker Topic: /crazyflie/gas_concentration_markers
       Name: MarkerArray
       Namespaces:
-        {}
+        gas_concentration_cf: true
+        gas_concentration_text: true
       Queue Size: 100
       Value: true
   Enabled: true

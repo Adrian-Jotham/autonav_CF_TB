@@ -49,23 +49,15 @@ def current_pose_callback(msg):
     global current_pose
     current_pose = msg
 
-# Writing to CSV file
-def write_to_csv():
-    with open("/home/dryan/Desktop/singleTB4.csv", "w") as file:
-        writer = csv.writer(file)
-        writer.writerow(['sec', 'nsec', 'X', 'Y','Z', 'Concentration'])
-        for data in data_list:
-            writer.writerow(data)
-
 # Initialize the node
 rospy.init_node('multiple_goal_navigation')
 navclient = actionlib.SimpleActionClient('move_base', MoveBaseAction)
 navclient.wait_for_server()
 
 # Subscribe to the mq135/ppm topic and amcl_pose
-rospy.Subscriber('/tb3/mq135/ppm', Float32, gas_concentration_callback)
-rospy.Subscriber('/tb3/amcl_pose', PoseWithCovarianceStamped, current_pose_callback)
-
+#rospy.Subscriber('/tb3/mq135/ppm', Float32, gas_concentration_callback)
+rospy.Subscriber('/tb3_0/amcl_pose', PoseWithCovarianceStamped, current_pose_callback)
+rospy.Subscriber('/tb3_1/amcl_pose', PoseWithCovarianceStamped, current_pose_callback)
 # List of goals
 goals = [
     #all wap
@@ -86,24 +78,27 @@ goals = [
     # {'x': 2.136, 'y': -2.296, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.998, 'ow': 0.0528},
     # {'x': 0.038, 'y': -1.974, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.998, 'ow': 0.0598},
 
-    #luar dalem
-    {'x': 5.453, 'y': -0.1364, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.862, 'ow': 0.506},
-    {'x': 3.987, 'y': -3.758, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.875, 'ow': 0.4828},
-    {'x': 3.438, 'y': -5.048, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.967, 'ow': 0.251},
-    {'x': 0.008, 'y': 0.1904, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0, 'ow': 0.999},
 
-    #kiri-kanan
+    #luardalam
     # {'x': 5.453, 'y': -0.1364, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.862, 'ow': 0.506},
-    # {'x': 5.085, 'y': -0.793, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.9997142, 'ow': 0.0509},
-    # {'x': 2.6917, 'y': -0.7537, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.998, 'ow': 0.0239},
-    # {'x': -0.0229, 'y': -0.538, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.665, 'ow': 0.746},
-    # {'x': -0.0132, 'y': -1.324, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.0399, 'ow': 0.999},
+    # {'x': 3.438, 'y': -5.048, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.967, 'ow': 0.251},
+    # {'x': -0.275, 'y': -2.923, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.0664, 'ow': 0.9977},
+    # {'x': 0.008, 'y': 0.1904, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0, 'ow': 0.999},
+
+    #kiri kanan
+    {'x': 5.453, 'y': -0.1364, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.862, 'ow': 0.506},
+    {'x': 5.085, 'y': -0.793, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.9997142, 'ow': 0.0509},
+    {'x': 2.6917, 'y': -0.7537, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.998, 'ow': 0.0239},
+    {'x': -0.0229, 'y': -0.538, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.665, 'ow': 0.746},
+    {'x': -0.0132, 'y': -1.324, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.0399, 'ow': 0.999},
+    {'x': 4.954, 'y': -1.631, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.7907, 'ow': 0.612},
 ]
+
 # goals = [
 #     # {'x': -0.066, 'y': 0.079, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0, 'ow': 1},
 #     # {'x': 5.3, 'y': 0.55, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.73, 'ow': 0.67},
 #     {'x': 5.11, 'y': -0.01, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.99, 'ow': 0.076},
-#     {'x': -0.12, 'y': -0.import geometry_msgs.msg6, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.73, 'ow': 0.67},
+#     {'x': -0.12, 'y': -0.6, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.73, 'ow': 0.67},
 #     {'x': -0.05, 'y': -1.17, 'z': 0, 'ox': 0, 'oy': 0, 'oz': 0.106, 'ow': 0.99},
 #     {'x': 5, 'y': -0.59, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.781, 'ow': 0.623},
 #     {'x': 5, 'y': -1.25, 'z': 0, 'ox': 0, 'oy': 0, 'oz': -0.997, 'ow': 0.069},
@@ -123,7 +118,7 @@ goals = [
 for index, goal_coords in enumerate(goals):
     rospy.loginfo("Sending goal {}...".format(index + 1))
     goal = MoveBaseGoal()
-    goal.target_pose.header.frame_id = "tb3/map"
+    goal.target_pose.header.frame_id = "map"
     goal.target_pose.header.stamp = rospy.Time.now()
     goal.target_pose.pose.position.x = goal_coords['x']
     goal.target_pose.pose.position.y = goal_coords['y']
@@ -143,5 +138,4 @@ for index, goal_coords in enumerate(goals):
 
     rospy.sleep(1)  # Optional: wait before sending the next goal
 
-write_to_csv()
 rospy.loginfo("All goals processed and data saved to CSV.")

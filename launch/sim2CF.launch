@@ -1,0 +1,38 @@
+<launch>
+  <arg name="namespace" default="" />
+  <!-- Arguments -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <!-- <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>  -->
+  <arg name="map_file" default="/home/dryan/catkin_ws/turtlebot3/turtlebot3_navigation/maps/map.yaml"/>
+  <arg name="open_rviz" default="true"/> 
+
+  <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <!-- rviz  -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find auto_nav)/src/simulation_cf2.rviz"/>
+  </group>
+
+  <!-- Skrip Grid -->
+  <node pkg="auto_nav" name="grid_marker" type="simulatedgrid.py" />
+  
+  <!-- Skrip Crazyflie -->
+  <node pkg="auto_nav" name="crazyflie_1" type="crazysimrandom.py" />
+  <!-- <node pkg="auto_nav" name="crazyflie_1" type="crazysimrandom2modifi.py" /> -->
+    <!-- Skrip Crazyflie -->
+  <node pkg="auto_nav" name="crazyflie_2" type="crazysimrandom2.py" />
+  <!-- <node pkg="auto_nav" name="crazyflie_2" type="crazysimrandom2modifi.py" /> -->
+
+  <!-- <node pkg="auto_nav" name="tb1" type="movementsimulation.py" /> -->
+
+  <!-- <node pkg="auto_nav" name="fake_sensor" type="tb3fakesensor.py"  output="screen" /> -->
+</launch>
+
+
+<!-- <group ns="tb3">
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)">
+    <param name="frame_id" value="tb3/map"/>
+  </node>
+  </group> -->

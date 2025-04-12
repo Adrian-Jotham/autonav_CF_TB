@@ -8,7 +8,7 @@ from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import Point
 
 def loggingcsv(data):
-    with open("/home/dryan/Desktop/SimulasiKamis/CF.csv", "w") as file:
+    with open("/home/dryan/Desktop/TigaRobot/CF_2.csv", "w") as file:
         # Write headers
         file.write("x, y, intensity, id\n")
         # Iterate over the list and write each item to the file
@@ -26,7 +26,7 @@ def calculate_intensity(x, y, sources):
     return max(intensities)
 
 def fakesensor(x, y, id):
-    marker_array_pub = rospy.Publisher('gas_sensor_array_cf', MarkerArray, queue_size=10)
+    marker_array_pub = rospy.Publisher('gas_sensor_array_cf_2', MarkerArray, queue_size=10)
     
     global sources, datalog, then
     intensity = calculate_intensity(x, y, sources)
@@ -59,7 +59,7 @@ def fakesensor(x, y, id):
 
     marker.pose.position.x = x
     marker.pose.position.y = y
-    marker.pose.position.z = 0.8
+    marker.pose.position.z = 1.3
 
     # Create text marker
     marker_text = Marker()
@@ -70,7 +70,7 @@ def fakesensor(x, y, id):
     marker_text.action = Marker.ADD
     marker_text.pose.position.x = x
     marker_text.pose.position.y = y
-    marker_text.pose.position.z = 1.0  # Offset the text above the marker
+    marker_text.pose.position.z = 1.5  # Offset the text above the marker
     marker_text.pose.orientation.w = 1
     marker_text.scale.z = 0.1  # Font size
     marker_text.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)  # White color
@@ -102,7 +102,7 @@ def create_moving_marker(x_start, y_start, x_end , y_end, velocity=0.35):
     offset = 0.5
     x_end -= offset
     y_end += offset
-    marker_pub = rospy.Publisher('Crazyflie', Marker, queue_size=10)
+    marker_pub = rospy.Publisher('Crazyflie_2', Marker, queue_size=10)
     
     rate = rospy.Rate(10)  # 10 Hz update rate
 
@@ -139,7 +139,7 @@ def create_moving_marker(x_start, y_start, x_end , y_end, velocity=0.35):
         # Update marker position
         marker.pose.position.x = current_position[0]
         marker.pose.position.y = current_position[1]
-        marker.pose.position.z = 0.8
+        marker.pose.position.z = 1.3
 
         # Publish marker
         marker_pub.publish(marker)
@@ -175,17 +175,17 @@ if __name__ == '__main__':
         time.sleep(3)
 
         # WP Single Crazyflie + semua waypoint
-        create_moving_marker(0, 0, 5.5, -0.5)
-        create_moving_marker(last_x, last_y, 5.0, -1.5)
+        # create_moving_marker(0, 0, 5.5, -0.5)
+        # create_moving_marker(last_x, last_y, 5.0, -1.5)
 
-        create_moving_marker(last_x, last_y, 0.5, -1.5)
-        create_moving_marker(last_x, last_y, 0.5, -2.5)
+        # create_moving_marker(last_x, last_y, 0.5, -1.5)
+        # create_moving_marker(last_x, last_y, 0.5, -2.5)
 
-        create_moving_marker(last_x, last_y, 5.0, -2.5)
-        create_moving_marker(last_x, last_y, 4.5, -3.5)
+        # create_moving_marker(last_x, last_y, 5.0, -2.5)
+        # create_moving_marker(last_x, last_y, 4.5, -3.5)
 
-        create_moving_marker(last_x, last_y, 0.8, -3.3)
-        create_moving_marker(last_x, last_y, 4.0, -5.0)
+        # create_moving_marker(last_x, last_y, 0.8, -3.3)
+        # create_moving_marker(last_x, last_y, 4.0, -5.0)
 
         # WP Crazyflie dalem
         # create_moving_marker(1.0, -3.0, 1.0, -1.0)
@@ -207,6 +207,16 @@ if __name__ == '__main__':
         # create_moving_marker(last_x, last_y, 0.8, -3.3)
         # create_moving_marker(last_x, last_y, 4.0, -5.0)
 
+
+        #WP BAGI TIGA
+        create_moving_marker(5.0, -2.0, 3.0, -2.0)
+        create_moving_marker(last_x, last_y, 3.0, -3.0)
+        create_moving_marker(last_x, last_y, 4.8, -3.0)
+        create_moving_marker(last_x, last_y, 4.5, -4.0)
+        create_moving_marker(last_x, last_y, 3.0, -4.0)
+        create_moving_marker(last_x, last_y, 4.0, -5.0)
+
         loggingcsv(datalog)
     except rospy.ROSInterruptException:
-        pass
+        loggingcsv(datalog)
+        
