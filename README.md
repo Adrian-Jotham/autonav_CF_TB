@@ -1,9 +1,9 @@
-# autonav_CF_TB
+# autonav_Crazyflie_Turtlebot3
 
 **Multi-Agent Robot Sensing Simulation and also real-world deployment**
 
-This project simulates autonomous navigation and pollutant density mapping using multiple robots.
-It leverages ROS (Robot Operating System) and Gazebo to model collaborative sensing behaviors in a shared environment.
+This project simulates autonomous navigation and pollutant density mapping using multiple robots, in this case Turtlebot3 as UGV and Crazyflie 2.x as UAV.
+It leverages ROS (Robot Operating System) and Gazebo to model collaborative sensing behaviors in a shared environment. This github repo should help you integrate Crazyflie and Turtlebot3 in the capsulated ROS environtment.
 
 ---
 
@@ -54,6 +54,9 @@ The system is designed to:
      roslaunch launch/your_launch_file.launch
      ```
    - Replace `your_launch_file.launch` with the appropriate launch file name.
+   - Real World Deployment 
+      Please look for "tb_cf.launch" launcher file
+   - Random Simulation and Implementation also provided in the launch file utilizing different random movements.
 
 ---
 
